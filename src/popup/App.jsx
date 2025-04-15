@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Controls from './components/controls';
+import Analysis from './components/analysis';
+import Loading from './components/loading';
 
 const App = () => {
   const [images, setImages] = useState([]);
@@ -43,6 +45,16 @@ const App = () => {
     });
   };
 
+  const handleBackToIdle = () => {
+    // Update local state
+    setAnalysisState('idle');
+    
+    // Update storage state
+    chrome.storage.local.set({ analysisState: 'idle' }, () => {
+      console.log('Returned to idle state');
+    });
+  };
+
   const renderAnalysisStatus = () => {
     switch (analysisState) {
       case 'in-progress':
@@ -62,19 +74,9 @@ const App = () => {
     <div className="app">
       <h2>Screen Size Changer</h2>
       {renderAnalysisStatus()}
-      <Controls />
-      <div className="image-list">
-        <h3>Images Found: {images.length}</h3>
-        {images.map((image, index) => (
-          <div key={index} className="image-item">
-            <p>URL: {image.url}</p>
-            <p>Size: {image.size} bytes</p>
-            <p>Type: {image.type}</p>
-            <p>Element Tag: {image.elementTag}</p>
-            <p>Dimensions: {image.elementWidth}x{image.elementHeight}</p>
-          </div>
-        ))}
-      </div>
+      {analysisState === 'idle' && <Controls />}
+      {analysisState === 'in-progress' && <Loading onCancel={handleBackToIdle} />}
+      {analysisState === 'completed' && <Analysis images={images} onBack={handleBackToIdle} />}
     </div>
   );
 };

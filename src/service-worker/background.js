@@ -34,18 +34,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return resizeWindow(width, height);
       })
       .then(updatedWindow => {
-        console.log('Window resized successfully, now attempting to reload tab');
-        return refreshActiveTabWithoutCache();
-      })
-      .then(tab => {
-        console.log('Tab refresh completed for:', tab.url);
-        // Setup the image listener after the tab is refreshed
+        // Setup the image listener BEFORE refreshing the tab
         try {
           removeImageListener = setupImageListener();
           console.log('Image listener has been set up');
         } catch (error) {
           console.error('Failed to set up image listener:', error);
         }
+        
+        console.log('Window resized successfully, now attempting to reload tab');
+        return refreshActiveTabWithoutCache();
+      })
+      .then(tab => {
+        console.log('Tab refresh completed for:', tab.url);
+        // Image listener is already set up, so no need to do it here
         
         // make the window back to as it was before the resize
         return new Promise(resolve => {
@@ -59,12 +61,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 // Mark analysis as completed when window is restored
                 chrome.storage.local.set({ analysisState: 'completed' }, () => {
                   console.log('Analysis marked as complete in storage');
+                  // Send response here to close the message channel properly
+                  sendResponse({ success: true, status: 'completed' });
                 });
                 
                 resolve();
               })
               .catch(error => {
                 console.error('Failed to restore window:', error);
+                sendResponse({ success: false, error: 'Failed to restore window' });
                 resolve();
               });
           }, 5000); // Wait 5 seconds before restoring
@@ -75,11 +80,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         // Update storage to reflect the error
         chrome.storage.local.set({ analysisState: 'error' }, () => {
           console.log('Analysis state set to error due to failure');
+          // Send response with error
+          sendResponse({ success: false, error: error.message || 'Operation failed' });
         });
         console.error('Operation failed:', error);
       });
+      
+    // Return true to indicate we'll respond asynchronously
+    return true;
   }
-  return true;
+  
+  // For other message types, respond immediately
+  sendResponse({ received: true });
 });
 
 // Add a tab change listener to stop analysis when the user switches tabs
