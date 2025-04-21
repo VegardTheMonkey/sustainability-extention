@@ -1,5 +1,6 @@
 import React from 'react';
 import ImageResizer from './image-resizer';
+import PieChart from './pie-chart';
 
 const Analysis = ({ images, onBack }) => {
   // Function to handle image resizing
@@ -49,6 +50,8 @@ const Analysis = ({ images, onBack }) => {
           Back
         </button>
       </div>
+      
+      {images.length > 0 && <PieChart images={images} />}
       
       <div className="image-list">
         {images.map((image, index) => (
