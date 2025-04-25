@@ -23,7 +23,7 @@ export function refreshActiveTabWithoutCache() {
           window.scrollTo({
             top: 0,
             left: 0,
-            behavior: 'auto' // 'auto' is more immediate than 'smooth'
+            behavior: 'auto' 
           });
         }
       })
@@ -45,13 +45,13 @@ export function refreshActiveTabWithoutCache() {
                 chrome.scripting.executeScript({
                   target: {tabId: tabId},
                   func: () => {
-                    // Get the total height of the page to scroll through
+                    // the total height of the page to scroll through
                     const totalHeight = Math.max(
                       document.body.scrollHeight,
                       document.documentElement.scrollHeight
                     );
                     
-                    const scrollDuration = 4000; // 4 seconds
+                    const scrollDuration = 4000; 
                     const scrollStep = 20; // Update scroll position every 20ms
                     const scrollInterval = scrollDuration / (totalHeight / scrollStep);
                     
@@ -77,7 +77,7 @@ export function refreshActiveTabWithoutCache() {
                   console.error('Failed to execute scroll-down script:', error);
                   resolve(tabs[0]); // Still resolve even if the scroll fails
                 });
-              }, 1000); // 1 second delay after refresh before scrolling down
+              }, 1000); 
             }
           });
         }, 50); // Small delay to ensure scroll takes effect

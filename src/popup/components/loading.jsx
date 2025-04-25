@@ -23,7 +23,7 @@ const Loading = ({ onCancel }) => {
         .loading-spinner {
           border: 4px solid rgba(0, 0, 0, 0.1);
           border-radius: 50%;
-          border-top: 4px solid #3498db;
+          border-top: 4px solid rgb(64, 122, 57);
           width: 40px;
           height: 40px;
           animation: spin 1s linear infinite;

@@ -4,12 +4,42 @@ const ImageResizer = ({ image, onResize }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState('jpeg');
   
-  // Common image formats to offer
+ 
   const formats = ['jpeg', 'png', 'webp', 'avif'];
   
   const handleResize = () => {
-    // Call the resize function passed from parent with selected parameters
-    onResize(image, selectedFormat);
+    // Implementation of image resizing logic
+    console.log(`Resizing image ${image.url} to ${image.elementWidth}x${image.elementHeight} in ${selectedFormat} format`);
+    
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = image.elementWidth;
+      canvas.height = image.elementHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // Convert to the selected format
+      const mimeType = `image/${selectedFormat}`;
+      const dataUrl = canvas.toDataURL(mimeType);
+      
+      // Create download link
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `resized-image.${selectedFormat}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+    
+    img.onerror = () => {
+      console.error('Error loading image for resizing');
+      alert('Could not resize image. The image might be from a different domain.');
+    };
+    
+    img.src = image.url;
+    
     setShowOptions(false);
   };
   
@@ -54,7 +84,7 @@ const ImageResizer = ({ image, onResize }) => {
         
         .resize-button {
           padding: 6px 12px;
-          background-color: #4CAF50;
+          background-color: rgb(64, 122, 57);
           color: white;
           border: none;
           border-radius: 4px;
@@ -63,7 +93,7 @@ const ImageResizer = ({ image, onResize }) => {
         }
         
         .resize-button:hover {
-          background-color: #45a049;
+          background-color: rgb(40, 97, 35);
         }
         
         .resize-options {
@@ -86,7 +116,7 @@ const ImageResizer = ({ image, onResize }) => {
         
         .apply-resize {
           padding: 6px 12px;
-          background-color: #2196F3;
+          background-color: rgb(64, 122, 57);
           color: white;
           border: none;
           border-radius: 4px;
@@ -96,7 +126,7 @@ const ImageResizer = ({ image, onResize }) => {
         }
         
         .apply-resize:hover {
-          background-color: #0b7dda;
+          background-color: rgb(40, 97, 35);
         }
       `}</style>
     </div>

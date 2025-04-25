@@ -1,16 +1,13 @@
-// Helper function to extract a URL from a CSS background-image value.
 function extractUrl(bgValue) {
     const match = bgValue.match(/url\(["']?([^"')]+)["']?\)/);
     return match ? match[1] : null;
 }
 
 // Function to find an element matching the image URL,
-// whether it's an <img> (via src, srcset, currentSrc) or a background image.
 export function findElementByImageUrl(imageUrl) {
-    // First try an exact <img> element match.
     let element = document.querySelector(`img[src="${imageUrl}"]`);
 
-    // If no exact match, check all <img> tags for a match in srcset or currentSrc.
+    
     if (!element) {
         const allImages = document.getElementsByTagName('img');
         for (const img of allImages) {

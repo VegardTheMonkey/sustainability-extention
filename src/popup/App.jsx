@@ -46,7 +46,6 @@ const App = () => {
   };
 
   const handleBackToIdle = () => {
-    // Update local state
     setAnalysisState('idle');
     
     // Update storage state
@@ -72,8 +71,7 @@ const App = () => {
 
   return (
     <div className="app">
-      <h2>Screen Size Changer</h2>
-      {renderAnalysisStatus()}
+      <h2>Web Image Sustainabilifier</h2>
       {analysisState === 'idle' && <Controls />}
       {analysisState === 'in-progress' && <Loading onCancel={handleBackToIdle} />}
       {analysisState === 'completed' && <Analysis images={images} onBack={handleBackToIdle} />}

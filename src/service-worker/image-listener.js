@@ -17,21 +17,25 @@ export const setupImageListener = () => {
             
             // Only log if we actually have a size
             if (contentLength !== 'unknown') {
-                // Send image data to content script for logging
-                chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                    if (tabs[0]) {
-                        chrome.tabs.sendMessage(tabs[0].id, {
-                            action: 'logImageData',
-                            imageData: imageData
-                        }, (response) => {
-                            // Add error handling for message sending
-                            if (chrome.runtime.lastError) {
-                                console.log('Error sending image data to content script:', chrome.runtime.lastError);
-                            } else if (response) {
-                                console.log('Image data sent to content script successfully');
+                // Store the image data directly in storage rather than trying to send to content script immediately
+                chrome.storage.local.get(['pendingImages'], (result) => {
+                    const pendingImages = result.pendingImages || [];
+                    pendingImages.push(imageData);
+                    chrome.storage.local.set({ pendingImages }, () => {
+                        // Try to notify active tab, but don't worry if it fails
+                        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+                            if (tabs[0]) {
+                                chrome.tabs.sendMessage(tabs[0].id, {
+                                    action: 'checkPendingImages'
+                                }, () => {
+                                    // Ignore any communication errors
+                                    if (chrome.runtime.lastError) {
+                                        // Content script not ready, that's okay - it will check storage when it loads
+                                    }
+                                });
                             }
                         });
-                    }
+                    });
                 });
             } else {
                 console.log(`Image detected but size unknown: ${details.url}`);

@@ -1,5 +1,5 @@
-// Import the findElementByImageUrl function
 import { findElementByImageUrl } from './findElement.js';
+import { handleImageSelection } from './selectImage.js';
 
 // Create arrays to store image data
 let receivedImages = [];
@@ -13,17 +13,18 @@ const processImages = () => {
   isProcessing = true;
   console.log(`Processing batch of ${receivedImages.length} images`);
   
-  // First, get existing images to check for duplicates
+  // get existing images to check for duplicates
   chrome.storage.local.get(['imageData'], (result) => {
     const existingImages = result.imageData || [];
     const existingUrls = new Set(existingImages.map(img => img.url));
+    
+    const processedUrls = new Set(processedImages.map(img => img.url));
     
     // Process all received images
     receivedImages.forEach(imageData => {
       const { url, size, type } = imageData;
       
-      // Skip images that are already stored
-      if (existingUrls.has(url)) {
+      if (existingUrls.has(url) || processedUrls.has(url)) {
         console.log(`Skipping duplicate image: ${url}`);
         return;
       }
@@ -46,6 +47,9 @@ const processImages = () => {
         elementWidth: imageElement ? imageElement.offsetWidth : null,
         elementHeight: imageElement ? imageElement.offsetHeight : null
       });
+      
+      // Add this URL to our set of processed URLs to prevent duplicates within the batch
+      processedUrls.add(url);
     });
     
     // Clear the received images array after processing
@@ -69,6 +73,28 @@ const processImages = () => {
   });
 };
 
+// Function to check for pending images in storage
+const checkPendingImages = () => {
+  chrome.storage.local.get(['pendingImages'], (result) => {
+    if (result.pendingImages && result.pendingImages.length > 0) {
+      console.log(`Found ${result.pendingImages.length} pending images to process`);
+      // Add pending images to our processing queue
+      receivedImages.push(...result.pendingImages);
+      
+      // Clear the pending images from storage
+      chrome.storage.local.set({ pendingImages: [] }, () => {
+        // Schedule processing
+        if (!isProcessing) {
+          setTimeout(processImages, 500);
+        }
+      });
+    }
+  });
+};
+
+// Check for pending images when content script initializes
+checkPendingImages();
+
 // Listen for messages from the service worker
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Check if the message is about logging image data
@@ -83,6 +109,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (!isProcessing) {
       setTimeout(processImages, 500); // Process batch after a short delay
     }
+  }
+  
+  // Check if we need to look for pending images
+  if (message.action === 'checkPendingImages') {
+    checkPendingImages();
+    sendResponse({ checking: true });
   }
   
   // Check if this is a stop analysis message
@@ -103,6 +135,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   
   // Return true to indicate you want to send a response asynchronously
   return true;
+});
+
+// Add a separate listener for image selection
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+  if (message.action === 'imageSelected') {
+    handleImageSelection(message.image);
+  }
 });
 
 // Log that the content script has been initialized
