@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Controls from './components/controls';
 import Analysis from './components/analysis';
 import Loading from './components/loading';
+import Error from './components/error';
 
 const App = () => {
   const [images, setImages] = useState([]);
@@ -75,6 +76,7 @@ const App = () => {
       {analysisState === 'idle' && <Controls />}
       {analysisState === 'in-progress' && <Loading onCancel={handleBackToIdle} />}
       {analysisState === 'completed' && <Analysis images={images} onBack={handleBackToIdle} />}
+      {analysisState === 'error' && <Error onBack={handleBackToIdle} />}
     </div>
   );
 };
