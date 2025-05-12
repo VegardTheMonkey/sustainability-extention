@@ -5,7 +5,7 @@ import extractDominantColor, { generateRandomColor } from '../utils/extractDomin
 import { co2 } from '@tgwf/co2';
 import { calculateEfficiencyGrade, getFormattedBytesPerPixel } from '../utils/bytePerPixel';
 
-// Register required Chart.js components console.log
+// Register required Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 // Custom tooltip component with image
@@ -55,16 +55,22 @@ const PieChart = ({ images, onImageSelect }) => {
   const totalSize = processedImages.reduce((sum, image) => sum + image.size, 0);
   console.log('Total size:', totalSize);
   
-  // Calculate CO2 emissions
+  // Calculate CO2 emissions using perVisit method
   useEffect(() => {
     if (totalSize > 0) {
-      // Create a new CO2 instance
-      const emissions = new co2();
-      
-
-      const totalCO2 = emissions.perByte(totalSize * 1000, true);
-      
-      setCo2Emission(totalCO2);
+      try {
+        // Create a new CO2 instance
+        const emissions = new co2();
+        console.log('CO2 instance created');
+        
+        // Use perVisit instead of perByte
+        const totalCO2 = emissions.perVisit(totalSize, true);
+        console.log(`CO2 perVisit calculation: ${totalCO2} grams`);
+        
+        setCo2Emission(totalCO2);
+      } catch (error) {
+        console.error('Error calculating CO2:', error);
+      }
     }
   }, [totalSize]);
   
@@ -270,17 +276,23 @@ const PieChart = ({ images, onImageSelect }) => {
         <>
           <Pie data={chartData} options={options} />
           
-          {co2Emission !== null && (
-            <div className="co2-info">
+          <div className="co2-info">
+            {co2Emission !== null ? (
               <p>
                 The total size of images ({(totalSize / 1024).toFixed(2)} KB) produces approximately{' '}
-                <strong>{co2Emission.toFixed(6)} grams</strong> of CO2 emissions per thousand visits.
+                <strong>{(co2Emission * 1000).toFixed(2)} grams</strong> of CO2 emissions per 1000 visits, 
+                equivalent to driving a Toyota Corolla for{' '}
+                <strong>{((co2Emission * 1000) / 197).toFixed(2)} km</strong>.{' '}
               </p>
-              <p className="eco-tip">
-                💡 Optimizing image sizes can help reduce your website's carbon footprint.
-              </p>
-            </div>
-          )}
+            ) : totalSize > 0 ? (
+              <p>Calculating CO2 emissions for {(totalSize / 1024).toFixed(2)} KB of images...</p>
+            ) : (
+              <p>No image data available to calculate CO2 emissions.</p>
+            )}
+            <p className="eco-tip">
+              💡 Optimizing image sizes can help reduce your website's carbon footprint.
+            </p>
+          </div>
         </>
       )}
       <style jsx>{`
@@ -316,7 +328,10 @@ const PieChart = ({ images, onImageSelect }) => {
         .eco-tip {
           margin-top: 8px;
           font-style: italic;
-          color: #4CAF50;
+          color:rgb(46, 122, 49);
+        }
+        .co2-info p {
+          font-size: 12px;
         }
       `}</style>
     </div>

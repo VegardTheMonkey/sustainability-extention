@@ -17,7 +17,7 @@ export const extractDominantColor = async (imageUrl) => {
       const ctx = canvas.getContext('2d');
       
       // Set canvas dimensions to image dimensions (with a max for performance)
-      const maxDimension = 150; // Limit size for better performance
+      const maxDimension = 150; 
       const scaleFactor = Math.min(1, maxDimension / Math.max(img.width, img.height));
       canvas.width = img.width * scaleFactor;
       canvas.height = img.height * scaleFactor;
@@ -39,7 +39,7 @@ export const extractDominantColor = async (imageUrl) => {
       // Count color occurrences with improvements
       const colorBuckets = {}; // Use color buckets instead of exact colors
       const sampleRate = 4; // Sample more pixels
-      const bucketSize = 16; // Color precision (lower = fewer buckets)
+      const bucketSize = 16; // Color precision
       
       for (let i = 0; i < data.length; i += 4 * sampleRate) {
         // Skip transparent or nearly transparent pixels

@@ -1,5 +1,6 @@
 import React from 'react';
 import ImageResizer from './image-resizer';
+import InfoBubble from './info-bubble';
 import { 
   calculateEfficiencyGrade, 
   getBytesPerPixel, 
@@ -46,6 +47,7 @@ const Image = ({ image, onBack }) => {
                   <td>Efficiency Grade:</td>
                   <td>
                     {calculateEfficiencyGrade(image)}
+                    <InfoBubble content="The efficiency grade is calculated based on the image's compression and format relative to its dimensions." />
                     {getBytesPerPixel(image) !== null && (
                       <>
                         <br />
@@ -62,7 +64,10 @@ const Image = ({ image, onBack }) => {
                 </tr>
                 <tr>
                   <td>Dimensions:</td>
-                  <td>{image.elementWidth || '?'}x{image.elementHeight || '?'}</td>
+                  <td>
+                    {image.elementWidth || '?'}x{image.elementHeight || '?'}
+                    <InfoBubble content="The dimensions of the image element in the HTML. Not the original dimensions of the image file." />
+                  </td>
                 </tr>
                 <tr>
                   <td>Element Tag:</td>
@@ -70,8 +75,15 @@ const Image = ({ image, onBack }) => {
                 </tr>
               </tbody>
             </table>
+            
           </div>
-          
+          <div className="tip-box">
+              <div className="tip-content">
+                <h5>Pro Tip: Responsive Images</h5>
+                <p>Use the <code>srcset</code> attribute to serve different image sizes based on device screen width, improving loading times, reducing bandwidth usage and is more eco-friendly.</p>
+                <a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images" target="_blank" rel="noopener noreferrer">Read more about responsive images</a>
+              </div>
+            </div>
           <div className="info-section">
             <h4>Optimization</h4>
             <ImageResizer image={image} />
@@ -181,19 +193,52 @@ const Image = ({ image, onBack }) => {
           font-size: 0.9em;
           color: #666;
         }
+
+        .bytes-per-pixel {
+          margin-left: 8px;
+          font-size: 0.9em;
+          color: #666;
+        }
         
-        @media (min-width: 768px) {
-          .image-content {
-            flex-direction: row;
-          }
-          
-          .image-preview {
-            width: 40%;
-          }
-          
-          .image-info {
-            width: 60%;
-          }
+        .tip-box {
+          background-color: #f0fff0;
+          border-left: 4px solid rgb(64, 122, 57);
+          margin-top: 15px;
+        }
+        
+        .tip-content {
+          padding: 10px;
+        }
+        
+        .tip-content h5 {
+          margin-top: 0;
+          margin-bottom: 8px;
+          color: rgb(64, 122, 57);
+          font-size: 1em;
+        }
+        
+        .tip-content p {
+          margin-bottom: 8px;
+          font-size: 12px;
+        }
+        
+        .tip-content code {
+          background-color: #e8f5e8;
+          padding: 2px 4px;
+          border-radius: 3px;
+          font-family: monospace;
+        }
+        
+        .tip-content a {
+          color: rgb(64, 122, 57);
+          text-decoration: none;
+          font-size: 0.9em;
+          display: inline-block;
+          margin-top: 5px;
+        }
+        
+        .tip-content a:hover {
+          text-decoration: underline;
         }
       `}</style>
     </div>

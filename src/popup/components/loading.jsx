@@ -44,6 +44,7 @@ const Loading = ({ onCancel }) => {
           border-radius: 4px;
           cursor: pointer;
           font-weight: bold;
+          display: none;
         }
         
         .cancel-button:hover {

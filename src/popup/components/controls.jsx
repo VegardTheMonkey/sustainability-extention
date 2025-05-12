@@ -68,7 +68,12 @@ const Controls = () => {
   return (
     <div className="controls">
       <div className="preset-sizes">
-        <h3>Select Screen Size:</h3>
+        <div className="preset-sizes-header">
+          <h3>
+            Select device type to render page as:
+          </h3>
+          <p>See how well the images of a page perfroms on different screen widths.</p>
+        </div>
         {presetSizes.map(size => (
           <div className="size-option" key={size.id}>
             <button 
@@ -173,6 +178,20 @@ const Controls = () => {
 
         .preset-sizes {
           margin-bottom: 20px;
+        }
+        
+        .preset-sizes-header {
+          display: column;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .preset-sizes-header h3 {
+          font-size: 16px;
+        }
+          
+        .preset-sizes-header p {
+          font-size: 14px;
         }
 
         .apply-section {

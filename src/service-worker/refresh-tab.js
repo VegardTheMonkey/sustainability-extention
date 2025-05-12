@@ -19,18 +19,18 @@ export function refreshActiveTabWithoutCache() {
       chrome.scripting.executeScript({
         target: {tabId: tabId},
         func: () => {
-          // Force immediate scroll to top
-          window.scrollTo({
-            top: 0,
-            left: 0,
-            behavior: 'auto' 
-          });
+          // Force immediate scroll to top with multiple approaches
+          window.scrollTo(0, 0); 
+          document.documentElement.scrollTop = 0; 
+          document.body.scrollTop = 0; 
+          
+          return window.pageYOffset || document.documentElement.scrollTop;
         }
       })
-      .then(() => {
-        console.log('Page scrolled to top, now refreshing');
+      .then((results) => {
+        const scrollPosition = results[0]?.result || 0;
+        console.log('Page scrolled to top, position:', scrollPosition);
         
-        // Add small delay to ensure scroll completes
         setTimeout(() => {
           // Then reload the tab without cache
           chrome.tabs.reload(tabId, {bypassCache: true}, () => {
@@ -52,7 +52,7 @@ export function refreshActiveTabWithoutCache() {
                     );
                     
                     const scrollDuration = 4000; 
-                    const scrollStep = 20; // Update scroll position every 20ms
+                    const scrollStep = Math.max(30, Math.ceil(totalHeight / 200)); 
                     const scrollInterval = scrollDuration / (totalHeight / scrollStep);
                     
                     let currentScroll = 0;
@@ -60,27 +60,28 @@ export function refreshActiveTabWithoutCache() {
                       currentScroll += scrollStep;
                       window.scrollTo(0, currentScroll);
                       
-                      // Stop when we reach the bottom
-                      if (currentScroll >= totalHeight) {
+                      // Stop when we reach the bottom with extra buffer
+                      if (currentScroll >= totalHeight + 200) {
                         clearInterval(scrollTimer);
+                        // Final scroll to ensure we hit absolute bottom
+                        window.scrollTo(0, document.body.scrollHeight);
                         console.log('Completed scrolling down the page');
                       }
                     }, scrollInterval);
                   }
                 })
                 .then(() => {
-                  console.log('Started page scroll-down process');
-                  // Resolve after roughly the time it takes to complete the scroll
+                  console.log('Started page scroll-down process');                
                   setTimeout(() => resolve(tabs[0]), 4000);
                 })
                 .catch(error => {
                   console.error('Failed to execute scroll-down script:', error);
-                  resolve(tabs[0]); // Still resolve even if the scroll fails
+                  resolve(tabs[0]); 
                 });
               }, 1000); 
             }
           });
-        }, 50); // Small delay to ensure scroll takes effect
+        }, 400); 
       })
       .catch(error => {
         console.error('Failed to scroll to top:', error);

@@ -72,7 +72,7 @@ const App = () => {
 
   return (
     <div className="app">
-      <h2>Web Image Sustainabilifier</h2>
+      <h2>Web Image Analyzer</h2>
       {analysisState === 'idle' && <Controls />}
       {analysisState === 'in-progress' && <Loading onCancel={handleBackToIdle} />}
       {analysisState === 'completed' && <Analysis images={images} onBack={handleBackToIdle} />}
