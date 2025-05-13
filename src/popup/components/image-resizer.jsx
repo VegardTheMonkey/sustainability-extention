@@ -358,7 +358,11 @@ const ImageResizer = ({ image, onResize }) => {
           background: #e0e0e0;
           outline: none;
           border-radius: 10px;
-          overflow: hidden;
+          overflow: hidden; 
+        }
+
+        .slider:hover {
+          cursor: pointer;
         }
         
         /* Chrome/Safari styling for the slider thumb */
